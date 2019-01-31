@@ -49,7 +49,7 @@ public class AppUtils {
 
 		}
 	
-		throw new ParameterNotFoundException(" : 세션 파라미터가 존재하지 않음");
+		throw new ParameterNotFoundException(" : 세션이 null이거나 파라미터가 존재하지 않음");
 	
 	}
 

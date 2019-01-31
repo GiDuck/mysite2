@@ -26,8 +26,7 @@ public class SelectOneFormAction implements Action {
 		BoardDao dao = new BoardDao();
 
 		long boardNum = AppUtils.getLongParameter(request, "boNum");
-		long writerNum = AppUtils.getLongParameter(request, "writerNo");
-		String status = null;
+		long writerNum = AppUtils.getLongParameter(request, "writerNum");
 
 
 		BoardVo vo = dao.getSelectedBoard(boardNum);
@@ -38,10 +37,10 @@ public class SelectOneFormAction implements Action {
 		try {
 			authVo = (UserVo) AppUtils.getSessionValue(request, "authuser");
 		} catch (ParameterNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
+		
 		if (authVo == null || authVo.getNo() == 0 || authVo.getNo() != writerNum) {
 
 			dao.counting(boardNum);
