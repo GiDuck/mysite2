@@ -9,20 +9,29 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.douzone.mvc.util.AppProps;
+import com.douzone.mvc.util.DBManager;
 import com.douzone.mysite.vo.GuestbookVo;
 
 public class GuestbookDao {
+	
+	
+	public GuestbookDao() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
 	public int delete( GuestbookVo vo ) {
 		int count = 0;
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 
 		try {
-			conn = getConnection();
+			conn = DBManager.getConnection();
 
 			String sql = 
 				" delete" + 
-				"   from guestbook" + 
+				"   from tbl_guestbook" + 
 				"  where no=?" +
 				"    and password=?";
 			pstmt = conn.prepareStatement( sql );
@@ -35,16 +44,8 @@ public class GuestbookDao {
 			System.out.println("error :" + e);
 		} finally {
 			// 자원 정리
-			try {
-				if (pstmt != null) {
-					pstmt.close();
-				}
-				if (conn != null) {
-					conn.close();
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+			DBManager.disconnect(conn, pstmt, null, null);
+
 		}
 
 		return count;		
@@ -56,11 +57,11 @@ public class GuestbookDao {
 		PreparedStatement pstmt = null;
 
 		try {
-			conn = getConnection();
+			conn = DBManager.getConnection();
 
 			String sql = 
 				" insert" + 
-				"   into guestbook" + 
+				"   into tbl_guestbook" + 
 				" values ( null, ?, ?, ?, now() )";
 			pstmt = conn.prepareStatement(sql);
 
@@ -73,17 +74,8 @@ public class GuestbookDao {
 		} catch (SQLException e) {
 			System.out.println("error :" + e);
 		} finally {
-			// 자원 정리
-			try {
-				if (pstmt != null) {
-					pstmt.close();
-				}
-				if (conn != null) {
-					conn.close();
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+			DBManager.disconnect(conn, pstmt, null, null);
+
 		}
 
 		return count;
@@ -97,7 +89,7 @@ public class GuestbookDao {
 		ResultSet rs = null;
 
 		try {
-			conn = getConnection();
+			conn = DBManager.getConnection();
 
 			// Statement 객체 생성
 			stmt = conn.createStatement();
@@ -108,7 +100,7 @@ public class GuestbookDao {
 				"          name," + 
 				"	       message," + 
 				"     	   date_format(reg_date, '%Y-%m-%d %h:%i:%s')" + 
-				"     from guestbook" + 
+				"     from tbl_guestbook" + 
 				" order by reg_date desc";
 			rs = stmt.executeQuery( sql );
 
@@ -131,37 +123,11 @@ public class GuestbookDao {
 			System.out.println("error :" + e);
 		} finally {
 			// 자원 정리
-			try {
-				if (rs != null) {
-					rs.close();
-				}
-				if (stmt != null) {
-					stmt.close();
-				}
-				if (conn != null) {
-					conn.close();
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+			DBManager.disconnect(conn, null, stmt, rs);
 		}
 
 		return list;
 	}
 
-	private Connection getConnection() throws SQLException {
-		Connection conn = null;
-		try {
-			//1. 드라이버 로딩
-			Class.forName( "com.mysql.jdbc.Driver" );
-			
-			//2. 연결하기
-			String url="jdbc:mysql://localhost/webdb?characterEncoding=utf8&serverTimezone=UTC";
-			conn = DriverManager.getConnection(url, "webdb", "webdb");
-		} catch( ClassNotFoundException e ) {
-			System.out.println( "드러이버 로딩 실패:" + e );
-		} 
-		
-		return conn;
-	}	
+	
 }

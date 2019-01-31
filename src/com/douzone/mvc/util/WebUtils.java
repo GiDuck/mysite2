@@ -21,7 +21,7 @@ public class WebUtils {
 		HttpServletResponse response,
 		String location) throws IOException, ServletException {
 		RequestDispatcher rd = 
-			request.getRequestDispatcher(location);
+		request.getRequestDispatcher(location);
 		rd.forward(request, response);
 	}
 }

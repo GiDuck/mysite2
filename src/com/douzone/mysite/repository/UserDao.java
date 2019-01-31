@@ -3,24 +3,95 @@ package com.douzone.mysite.repository;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.douzone.mvc.util.DBManager;
 import com.douzone.mysite.vo.UserVo;
 
 public class UserDao {
-	
+	public UserVo get(String email, String password) {
+		UserVo result = null;
+
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
+		try {
+			conn = DBManager.getConnection();
+
+			String sql = " select no, name" + "   from tbL_user" + "  where email=?" + "    and password=?";
+			pstmt = conn.prepareStatement(sql);
+
+			pstmt.setString(1, email);
+			pstmt.setString(2, password);
+
+			rs = pstmt.executeQuery();
+			if (rs.next()) {
+				long no = rs.getLong(1);
+				String name = rs.getString(2);
+
+				result = new UserVo();
+				result.setNo(no);
+				result.setName(name);
+			}
+		} catch (SQLException e) {
+			System.out.println("error :" + e);
+		} finally {
+			// 자원 정리
+			DBManager.disconnect(conn, pstmt, null, rs);
+
+		}
+
+		return result;
+	}
+
+	public UserVo get(Long no) {
+		UserVo result = new UserVo();
+
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
+		try {
+			conn = DBManager.getConnection();
+
+			String sql = " select * from tbL_user where no = ? ";
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setLong(1, no);
+
+			rs = pstmt.executeQuery();
+			if (rs.next()) {
+				
+				result.setNo(rs.getLong(1));
+				result.setName(rs.getString(2));
+				result.setEmail(rs.getString(3));
+				result.setPassword(rs.getString(4));
+				result.setGender(rs.getString(5));
+				result.setJoinDate(rs.getString(6));
+			}
+
+			return result;
+
+		} catch (SQLException e) {
+			System.out.println("error :" + e);
+		} finally {
+			// 자원 정리
+			DBManager.disconnect(conn, pstmt, null, rs);
+		}
+
+		return result;
+	}
+
 	public int insert(UserVo vo) {
 		int count = 0;
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 
 		try {
-			conn = getConnection();
+			conn = DBManager.getConnection();
 
-			String sql = 
-				" insert" + 
-				"   into user" + 
-				" values ( null, ?, ?, ?, ?, now() )";
+			String sql = " insert" + "   into tbL_user" + " values ( null, ?, ?, ?, ?, now() )";
 			pstmt = conn.prepareStatement(sql);
 
 			pstmt.setString(1, vo.getName());
@@ -33,35 +104,40 @@ public class UserDao {
 		} catch (SQLException e) {
 			System.out.println("error :" + e);
 		} finally {
-			// 자원 정리
-			try {
-				if (pstmt != null) {
-					pstmt.close();
-				}
-				if (conn != null) {
-					conn.close();
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+			DBManager.disconnect(conn, pstmt, null, null);
+
 		}
 
 		return count;
 	}
-	
-	private Connection getConnection() throws SQLException {
+
+	public boolean update(UserVo vo) {
+
 		Connection conn = null;
+		PreparedStatement pstmt = null;
+		String sql = "update tbL_user set name = ?, email = ?, " + "password = ? , gender = ? where no = ?";
+
 		try {
-			//1. 드라이버 로딩
-			Class.forName( "com.mysql.jdbc.Driver" );
-			
-			//2. 연결하기
-			String url="jdbc:mysql://localhost/webdb?characterEncoding=utf8&serverTimezone=UTC";
-			conn = DriverManager.getConnection(url, "webdb", "webdb");
-		} catch( ClassNotFoundException e ) {
-			System.out.println( "드러이버 로딩 실패:" + e );
-		} 
-		
-		return conn;
-	}	
+
+			conn = DBManager.getConnection();
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, vo.getName());
+			pstmt.setString(2, vo.getEmail());
+			pstmt.setString(3, vo.getPassword());
+			pstmt.setString(4, vo.getGender());
+			pstmt.setLong(5, vo.getNo());
+			pstmt.executeUpdate();
+			return true;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			DBManager.disconnect(conn, pstmt, null, null);
+
+		}
+
+		return false;
+
+	}
+
 }
